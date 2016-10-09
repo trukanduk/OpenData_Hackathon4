@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
-import com.google.common.collect.HashBiMap;
 import com.google.common.primitives.Ints;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -53,8 +52,7 @@ public class TimeTableParser {
 					Iterator<String> timeStrParts = Splitter.on('.').split(timeStr).iterator();
 					int timeOfDeparture = Ints.tryParse(timeStrParts.next()) * 60 + Ints.tryParse(timeStrParts.next());
 					Timetable timetable = timetables.getOrDefault(train, new Timetable());
-					Preconditions.checkState(!timetable.getStationTimeMap().containsKey(station));
-					timetable.getStationTimeMap().put(station, timeOfDeparture);
+					timetable.getStations().add(new Pair(station, timeOfDeparture));
 					timetables.put(train, timetable);
 				}
 			}
@@ -73,10 +71,28 @@ public class TimeTableParser {
 	}
 
 	private static final class Timetable {
-		private Map<String, Integer> stationTimeMap = HashBiMap.create();
+		private List<Pair> stations = new ArrayList<>();
 
-		public Map<String, Integer> getStationTimeMap() {
-			return stationTimeMap;
+		public List<Pair> getStations() {
+			return stations;
+		}
+	}
+
+	private static final class Pair {
+		private final String station;
+		private final int time;
+
+		public Pair(String station, int time) {
+			this.station = station;
+			this.time = time;
+		}
+
+		public String getStation() {
+			return station;
+		}
+
+		public int getTime() {
+			return time;
 		}
 	}
 }
