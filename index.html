@@ -149,19 +149,6 @@
         $("#slider").slider({
               formatter: time2str});
 
-        // $("#slider-enabled").click(function() {
-        //   if(this.checked) {
-        //     // $("#slider").slider("enable");
-        //     setWorldTimer(0);
-        //     console.log("resume");
-        //   }
-        //   else {
-        //     // $("#slider").slider("disable");
-        //     setWorldTimer(1);
-        //     console.log("pause");
-        //   }
-        // });
-
           $("#slider-enabled").click(function() {
           if(!$("#slider-enabled").hasClass("active")) {
             // $("#slider").slider("enable");
@@ -195,9 +182,7 @@
     <div id="timer"></div>
     <div id="slider-block">
       <input id="slider" type="text" data-slider-min="0" data-slider-max="1439" data-slider-step="10"  data-slider-value="5" />
-      <!-- <input id="slider-enabled" type="checkbox"/> -->
       <button id="slider-enabled" type="button" class="btn btn-info glyphicon glyphicon-pause" data-toggle="button" aria-pressed="false" autocomplete="off">
-  <!-- <span id="slider-enabled-2" class="glyphicon glyphicon-pause">Пауза</span> -->
       </button>
 
     </div>
