@@ -85,16 +85,21 @@
 
       }
 
-      function setTimerValue(t) {
-        var hours = Math.floor(t/60) + "";
+      function time2str(minutes) {
+        var hours = Math.floor(minutes/60) + "";
         while (hours.length < 2) {
           hours = "0" + hours;
         }
-        var minutes = Math.floor(t%60) + "";
+        var minutes = Math.floor(minutes%60) + "";
         while (minutes.length < 2) {
           minutes = "0" + minutes;
         }
-        $("#timer").text(hours + ":" + minutes);
+
+        return hours + ":" + minutes
+      }
+
+      function setTimerValue(t) {
+        $("#timer").text(time2str(t));
         $("#slider").slider().data('slider').setValue(t);
       }
 
@@ -142,18 +147,16 @@
         setWorldTimer(1);
 
         $("#slider").slider({
-              formatter: function(value) {
-            return Math.floor(value / 60) + ":" + (value % 60);
-          }});
+              formatter: time2str});
 
         $("#slider-enabled").click(function() {
           if(this.checked) {
-            $("#slider").slider("enable");
+            // $("#slider").slider("enable");
             setWorldTimer(0);
             console.log("resume");
           }
           else {
-            $("#slider").slider("disable");
+            // $("#slider").slider("disable");
             setWorldTimer(1);
             console.log("pause");
           }
@@ -177,7 +180,7 @@
     </div>
     <div id="timer"></div>
     <div id="slider-block">
-      <input id="slider" type="text" data-slider-min="0" data-slider-max="1439" data-slider-step="10"  data-slider-value="5" data-slider-enabled="false"/>
+      <input id="slider" type="text" data-slider-min="0" data-slider-max="1439" data-slider-step="10"  data-slider-value="5" />
       <input id="slider-enabled" type="checkbox"/>
     </div>
   </body>
