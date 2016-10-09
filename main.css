@@ -82,3 +82,8 @@ body {
 h1 {
   text-align: center;
 }
+
+.btn-info.active {
+  background-color: #20758e;
+  border-color: #2188a7;
+}
