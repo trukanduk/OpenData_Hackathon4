@@ -1,5 +1,5 @@
-var inBasketOffset = [15, 5];
-var outBasketOffset = [45, 45];
+var inBasketOffset = [17, 7];
+var outBasketOffset = [38, 30];
 var jiff = 100;
 
 var StationsCounter = 0;
@@ -21,7 +21,7 @@ function Station(map, name, coords, offset) {
   self.percY = perc[1];
 
   self.element.css("top", "calc(" + self.percY + "% + (" + self.offset[1] + "px))");
-  self.element.css("left", "calc(" + self.percX + "% + (" + self.offset[1] + "px))");
+  self.element.css("left", "calc(" + self.percX + "% + (" + self.offset[0] + "px))");
 
   self.inpIntensity = 0;
   self.outIntensity = 0;
