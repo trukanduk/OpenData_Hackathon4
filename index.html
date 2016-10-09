@@ -149,8 +149,8 @@
         $("#slider").slider({
               formatter: time2str});
 
-        $("#slider-enabled").click(function() {
-          if(this.checked) {
+          $("#slider-enabled").click(function() {
+          if(!$("#slider-enabled").hasClass("active")) {
             // $("#slider").slider("enable");
             setWorldTimer(0);
             console.log("resume");
@@ -161,6 +161,7 @@
             console.log("pause");
           }
         });
+
         var updateSliderTime = function() {
           setWorldTime(sliderTime.getValue());
         };
@@ -174,14 +175,16 @@
     </script>
   </head>
   <body>
-    <h1>Люди в корзинах</h1>
+    <h1>Остаться в живых</h1>
     <div id="map">
       <div id="pipkas"></div>
     </div>
     <div id="timer"></div>
     <div id="slider-block">
       <input id="slider" type="text" data-slider-min="0" data-slider-max="1439" data-slider-step="10"  data-slider-value="5" />
-      <input id="slider-enabled" type="checkbox"/>
+      <button id="slider-enabled" type="button" class="btn btn-info glyphicon glyphicon-pause" data-toggle="button" aria-pressed="false" autocomplete="off">
+      </button>
+
     </div>
   </body>
 </html>
