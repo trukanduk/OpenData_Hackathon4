@@ -16,17 +16,17 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 public class TimeTableParser {
 
 	public static final CSVFormat CSV_FORMAT = CSVFormat.newFormat('\t').withFirstRecordAsHeader();
 	public static final String STATION_NAME = "Остановочные пункты";
 	private final List<String> trains = new ArrayList<>();
-	private final Map<String, Timetable> timetables = new HashMap<>();
+	private final Map<String, Timetable> timetables = new TreeMap<>();
 	private final ObjectMapper mapper = new ObjectMapper();
 
 	private void load(String filename) throws IOException {
