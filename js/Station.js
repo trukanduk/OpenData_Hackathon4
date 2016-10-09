@@ -12,7 +12,7 @@ function Station(map, name, coords, offset) {
   self.offset = offset || [10, -25];
   // self.dataflow = [];
 
-  map.append("<div id='pipka_" + self.id + "' class='pipka'></div>");
+  map.prepend("<div id='pipka_" + self.id + "' class='pipka'></div>");
   self.element = map.find("#pipka_" + self.id);
   // console.log(self.element, self.element.append);
 
