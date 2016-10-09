@@ -4,44 +4,51 @@
     <script src="js/RingBuffer.js" type="text/javascript"></script>
     <script src="js/Station.js" type="text/javascript"></script>
     <script src="js/Guy.js" type="text/javascript"></script>
+    <script src="js/Train.js" type="text/javascript"></script>
 
     <script src="data/wednesday.js" type="text/javascript"></script>
+    <script src="data/timetable.js" type="text/javascript"></script>
 
     <!--<script src="schools-data2.js" type="text/javascript"></script>-->
     <!-- <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script> -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="main.css" />
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" type="text/javascript"></script>
     <script type="text/javascript">
       var second = 1000;
 
-      var map_coords = {
-        // start: [55.865327, 35.863506],
-        // end: [55.419975, 37.653470]
-        // start: [55.79047, 36.96831],
-        // end: [55.57524, 37.87331]
-        start: [55.836, 36.90788],
-        end: [55.5799, 37.77443]
-      };
-      var map_size = [
-        map_coords.end[0] - map_coords.start[0],
-        map_coords.end[1] - map_coords.start[1]
-      ];
+      var map_start = [55.836, 36.90788];
+      var map_end = [55.5799, 37.77443];
+      var map_size = [map_end[0] - map_start[0], map_end[1] - map_start[1]];
+
+      function attlong2perc(coords) {
+        // Attention: returns percents!
+        return [100*(coords[1] - map_start[1]) / map_size[1],
+                100*(coords[0] - map_start[0]) / map_size[0]];
+      }
 
       var stations_info = [
-        { name: "Белорусская",  coords: [55.776507, 37.58155],  offset: [10, -25] },
+        { name: "Белорусская",  coords: [55.776507, 37.581550], offset: [10, -25] },
         { name: "Беговая",      coords: [55.773179, 37.549965], offset: [10, -25] },
         { name: "Фили",         coords: [55.744021, 37.514391], offset: [10, -25] },
-        { name: "Кунцево-1",    coords: [55.726837, 37.44895],  offset: [10, -25] },
+        { name: "Кунцево-1",    coords: [55.726837, 37.448950], offset: [10, -25] },
         { name: "Сетунь",       coords: [55.723244, 37.396334], offset: [10, -25] },
         { name: "Баковка",      coords: [55.682569, 37.314669], offset: [10, -25] },
-        { name: "Одинцово",     coords: [55.672362, 37.28268],  offset: [10, -25] },
+        { name: "Одинцово",     coords: [55.672362, 37.282680], offset: [10, -25] },
         { name: "Отрадное",     coords: [55.667802, 37.250379], offset: [10, -25] },
         { name: "Жаворонки",    coords: [55.641834, 37.096346], offset: [10, -25] },
         { name: "Голицыно",     coords: [55.614944, 36.986498], offset: [10, -25] },
         // { name: "Тучково",      coords: [55.597313, 36.468268] },
         // { name: "Можайск",      coords: [55.494289, 36.032167] },
       ];
-      var stations;
+      var stations = [];
+
+      var _stationName2stationIndex = {};
+      function getStationByName(name) {
+        return stations[_stationName2stationIndex[name]];
+      }
+
+      var trains = [];
 
       var worldTime = 0;
       function setWorldTime(t) {
@@ -59,6 +66,11 @@
           station.inpIntensity = Math.ceil(item.in/10);
           station.outpIntensity = Math.ceil(item.out/10);
 
+        }
+
+        for (var i = 0; i < trains.length; ++i) {
+          var train = trains[i];
+          train.setTime(t);
         }
 
         worldTime = t;
@@ -92,7 +104,7 @@
 
         if (minutesByJiff > 0) {
           worldTimeIntervalId = setInterval(function() {
-            setWorldTime(worldTime + minutesByJiff);
+            advanceWorldTime(minutesByJiff);
           }, 100);
         }
       }
@@ -105,66 +117,27 @@
 
         for (var i = 0; i < stations_info.length; ++i) {
           var info = stations_info[i];
-          stations.push(new Station(map, info.name, info.coords));
+          var station = new Station(map, info.name, info.coords)
+          _stationName2stationIndex[station.name] = stations.length;
+          stations.push(station);
         }
 
+        for (var i = 0; i < timetable.length; ++i) {
+          var info = timetable[i];
+          var train = new Train(map, info);
+          // var station = new Station(map, info.name, info.coords)
+          // _stationName2stationIndex[station.name] = stations.length;
+          // stations.push(station);
+          trains.push(train);
+        }
+
+        setWorldTime(3*60); // 3:00
         setWorldTimer(1);
       });
     </script>
-    <style>
-      body {
-        background-color: #122e42;
-      }
-      #map {
-        /*width: 1302px;
-        height: 585px;*/
-        /*width: 1329px;
-        height: 544px;*/
-        width: 1257px;
-        height: 733px;
-        background-size: 100% 100%;
-        background-image: url("img/background.png");
-        position: relative;
-        overflow: hidden;
-      }
-
-      #timer {
-        font-size: 30pt;
-        font-family: Verdana;
-        position: absolute;
-        top: 100px;
-        left: 50px;
-        color: white;
-      }
-
-      #map > .pipka {
-        position: absolute;
-        width: 70px;
-        height: 50px;
-        background-image: url("img/pipka.png");
-        /*background-color: red;*/
-      }
-
-      #map .guy {
-        position: absolute;
-        width: 10px;
-        height: 10px;
-      }
-
-      #map .guy-green {
-        background-image: url("img/ball_green.png");
-      }
-
-      #map .guy-red {
-        background-image: url("img/ball_red.png");
-      }
-
-      #map .guy-yellow {
-        background-image: url("img/ball_yellow.png");
-      }
-    </style>
   </head>
   <body>
+    <h1>Люди в корзинах</h1>
     <div id="map">
     </div>
     <div id="timer"></div>

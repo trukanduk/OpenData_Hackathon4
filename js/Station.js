@@ -16,8 +16,9 @@ function Station(map, name, coords, offset) {
   self.element = map.find("#pipka_" + self.id);
   // console.log(self.element, self.element.append);
 
-  self.percY = 100*(self.coords[0] - map_coords.start[0]) / map_size[0];
-  self.percX = 100*(self.coords[1] - map_coords.start[1]) / map_size[1];
+  var perc = attlong2perc(self.coords);
+  self.percX = perc[0];
+  self.percY = perc[1];
 
   self.element.css("top", "calc(" + self.percY + "% + (" + self.offset[1] + "px))");
   self.element.css("left", "calc(" + self.percX + "% + (" + self.offset[1] + "px))");
