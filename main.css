@@ -41,6 +41,16 @@ body {
   color: white;
 }
 
+#slider-block {
+  font-size: 30pt;
+  font-family: Verdana;
+  position: absolute;
+  top: 150px;
+  left: 50px;
+  color: white;
+}
+
+
 #map > .pipka {
   position: absolute;
   background-size: 100% 100%;
