@@ -55,6 +55,7 @@ public class TimeTableParser {
 					Timetable timetable = timetables.getOrDefault(train, new Timetable());
 					Preconditions.checkState(!timetable.getStationTimeMap().containsKey(station));
 					timetable.getStationTimeMap().put(station, timeOfDeparture);
+					timetables.put(train, timetable);
 				}
 			}
 		}
