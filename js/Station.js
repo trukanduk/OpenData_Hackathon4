@@ -3,12 +3,13 @@ var outBasketOffset = [45, 45];
 var jiff = 100;
 
 var StationsCounter = 0;
-function Station(map, name, coords) {
+function Station(map, name, coords, offset) {
   var self = this;
 
   self.name = name;
   self.id = StationsCounter++;
   self.coords = coords;
+  self.offset = offset || [10, -25];
   // self.dataflow = [];
 
   map.append("<div id='pipka_" + self.id + "' class='pipka'></div>");
@@ -18,8 +19,8 @@ function Station(map, name, coords) {
   self.percY = 100*(self.coords[0] - map_coords.start[0]) / map_size[0];
   self.percX = 100*(self.coords[1] - map_coords.start[1]) / map_size[1];
 
-  self.element.css("top", "calc(" + self.percY + "% - 25px)");
-  self.element.css("left", "calc(" + self.percX + "% + 10px)");
+  self.element.css("top", "calc(" + self.percY + "% + (" + self.offset[1] + "px))");
+  self.element.css("left", "calc(" + self.percX + "% + (" + self.offset[1] + "px))");
 
   self.inpIntensity = 0;
   self.outIntensity = 0;

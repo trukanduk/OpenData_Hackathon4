@@ -28,24 +28,24 @@
       ];
 
       var stations_info = [
-        { name: "Белорусская", coords: [55.776507, 37.58155] },
-        { name: "Беговая", coords: [55.773179, 37.549965] },
-        { name: "Фили", coords: [55.744021, 37.514391] },
-        { name: "Кунцево-1", coords: [55.726837, 37.44895] },
-        { name: "Сетунь", coords: [ 55.723244, 37.396334] },
-        { name: "Баковка", coords: [55.682569, 37.314669] },
-        { name: "Одинцово", coords: [55.672362, 37.28268] },
-        { name: "Отрадное", coords: [55.667802, 37.250379] },
-        { name: "Жаворонки", coords: [55.641834, 37.096346] },
-        { name: "Голицыно", coords: [55.614944, 36.986498] },
-        // { name: "Тучково", coords: [55.597313, 36.468268] },
-        // { name: "Можайск", coords: [55.494289, 36.032167] },
+        { name: "Белорусская",  coords: [55.776507, 37.58155],  offset: [10, -25] },
+        { name: "Беговая",      coords: [55.773179, 37.549965], offset: [10, -25] },
+        { name: "Фили",         coords: [55.744021, 37.514391], offset: [10, -25] },
+        { name: "Кунцево-1",    coords: [55.726837, 37.44895],  offset: [10, -25] },
+        { name: "Сетунь",       coords: [55.723244, 37.396334], offset: [10, -25] },
+        { name: "Баковка",      coords: [55.682569, 37.314669], offset: [10, -25] },
+        { name: "Одинцово",     coords: [55.672362, 37.28268],  offset: [10, -25] },
+        { name: "Отрадное",     coords: [55.667802, 37.250379], offset: [10, -25] },
+        { name: "Жаворонки",    coords: [55.641834, 37.096346], offset: [10, -25] },
+        { name: "Голицыно",     coords: [55.614944, 36.986498], offset: [10, -25] },
+        // { name: "Тучково",      coords: [55.597313, 36.468268] },
+        // { name: "Можайск",      coords: [55.494289, 36.032167] },
       ];
       var stations;
 
       var worldTime = 0;
       function setWorldTime(t) {
-        t = t % 1440;
+        t = Math.floor(t) % 1440;
 
         for (var i = 0; i < stations.length; ++i) {
           var station = stations[i];
@@ -55,22 +55,48 @@
             continue;
           }
 
-          console.log("Station " + station.name + ":", item.in, item.out);
+          // console.log("Station " + station.name + ":", item.in, item.out);
           station.inpIntensity = Math.ceil(item.in/10);
           station.outpIntensity = Math.ceil(item.out/10);
 
-          worldTime = t;
-          var hours = Math.floor(worldTime/60) + "";
-          while (hours.length < 2) {
-            hours = "0" + hours;
-          }
-          var minutes = worldTime % 60 + "";
-          while (minutes.length < 2) {
-            minutes = "0" + minutes;
-          }
-          $("#timer").text(hours + ":" + minutes);
+        }
+
+        worldTime = t;
+        setTimerValue(worldTime);
+      }
+
+      function advanceWorldTime(dt) {
+        setWorldTime(worldTime + dt);
+      }
+
+      function setTimerValue(t) {
+        console.log(t);
+
+        var hours = Math.floor(t/60) + "";
+        while (hours.length < 2) {
+          hours = "0" + hours;
+        }
+        var minutes = Math.floor(t%60) + "";
+        while (minutes.length < 2) {
+          minutes = "0" + minutes;
+        }
+        $("#timer").text(hours + ":" + minutes);
+      }
+
+      var worldTimeIntervalId;
+      function setWorldTimer(minutesByJiff) {
+        if (worldTimeIntervalId) {
+          clearInterval(worldTimeIntervalId);
+          worldTimeIntervalId = undefined;
+        }
+
+        if (minutesByJiff > 0) {
+          worldTimeIntervalId = setInterval(function() {
+            setWorldTime(worldTime + minutesByJiff);
+          }, 100);
         }
       }
+
       //*******************************************************************************************
       // main
       $(document).ready(function() {
@@ -82,27 +108,13 @@
           stations.push(new Station(map, info.name, info.coords));
         }
 
-        // setWorldTime(60*6 + 30);
-        setInterval(function() {
-          setWorldTime(worldTime + 5);
-        }, 100);
-        // for (var i = 0; i < stations.length; ++i) {
-        //   var station = stations[i];
-        //   station.inpIntensity = 4;
-        //   station.outpIntensity = 4;
-
-          // for (var j = 0; j < 10; ++j)
-          // {
-          //   var r = Math.random();
-          //   var type = (r < 0.3 ? "green" : r < 0.6 ? "red" : "yellow");
-          //   var g = new Guy(map, "green", stations[i]);
-          //   moveGuyToBasket(g, FadeGuyIn);
-          //   // FadeGuyIn(g, 0.01);
-          // }
-        // }
+        setWorldTimer(1);
       });
     </script>
     <style>
+      body {
+        background-color: #122e42;
+      }
       #map {
         /*width: 1302px;
         height: 585px;*/
