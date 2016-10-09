@@ -133,7 +133,6 @@ Station.prototype.moveOutpGuyFromBasket = function(guy) {
   var totalTicks = second/jiff;
   var radius = Math.max(40, Math.min(30 / Math.random(), 1000));
   radius *= (Math.random() > 0.5 ? +1 : -1);
-  console.log(radius)
   var totalAngle = dist/Math.abs(radius); // dist = angle*r => angle = dist/r
   // var totalAngle = (Math.random()*0.3 + 0.2) * 3.1416;
 

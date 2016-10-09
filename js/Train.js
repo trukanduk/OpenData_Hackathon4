@@ -1,17 +1,19 @@
 var trainsCounter = 0
 function Train(map, trainInfo) {
-  this.id = trainInfo.trainId;
+  this.id = trainsCounter++;
   this.map = map;
   map.append("<div id='train_" + this.id + "' class='train'></div>");
   this.element = map.find("#train_" + this.id);
 
-  this.timetable = timetable;
+  this.timetable = trainInfo.stations;
+  // console.debug("Train created: ", timetable.length);
 }
 
 Train.prototype.findSegment = function(t) {
-  if (this.timetable[0].time < t) {
+  console.log(t, this.timetable[0].time, this.timetable[this.timetable.length - 1].time)
+  if (this.timetable[0].time > t) {
     return Number.NEGATIVE_INFINITY;
-  } else if (this.timetable[this.timetable.length - 1].time > t) {
+  } else if (this.timetable[this.timetable.length - 1].time <= t) {
     return Number.POSITIVE_INFINITY;
   }
 
@@ -25,6 +27,10 @@ Train.prototype.findSegment = function(t) {
     }
   }
 
+  if (l + 1 >= this.timetable.length) {
+    return Number.POSITIVE_INFINITY;
+  }
+  console.log(t, " in ", this.timetable[l].time);
   return l;
 };
 
@@ -39,6 +45,11 @@ Train.prototype.setTime = function(t) {
   var srcStationInfo = this.timetable[segmIndex];
   var dstStationInfo = this.timetable[segmIndex + 1];
 
+  if (!dstStationInfo) {
+    console.warn("time", t, srcStationInfo.time);
+    return;
+  }
+  // console.log(this.timetable, segmIndex, srcStationInfo, dstStationInfo);
   var ratio = (dstStationInfo.time - t) / (dstStationInfo.time - srcStationInfo.time);
   var srcStation = getStationByName(srcStationInfo.station);
   var dstStation = getStationByName(dstStationInfo.station);

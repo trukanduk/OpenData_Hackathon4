@@ -83,8 +83,6 @@
       }
 
       function setTimerValue(t) {
-        console.log(t);
-
         var hours = Math.floor(t/60) + "";
         while (hours.length < 2) {
           hours = "0" + hours;
@@ -124,17 +122,19 @@
         }
 
         if (ENABLE_TRAINS) {
-          for (var i = 0; i < timetable.length; ++i) {
+          for (var i in timetable) {
             var info = timetable[i];
             var train = new Train(map, info);
             // var station = new Station(map, info.name, info.coords)
             // _stationName2stationIndex[station.name] = stations.length;
             // stations.push(station);
             trains.push(train);
+            break;
           }
         }
 
-        setWorldTime(6*60); // 3:00
+        setWorldTime(313); // 3:00
+        // setWorldTime(5*60); // 3:00
         setWorldTimer(1);
       });
     </script>
@@ -142,6 +142,7 @@
   <body>
     <h1>Люди в корзинах</h1>
     <div id="map">
+      <div id="pipkas"></div>
     </div>
     <div id="timer"></div>
   </body>

@@ -4,11 +4,8 @@ body {
   color: white;
   text-align:center;
 }
+
 #map {
-  /*width: 1302px;
-  height: 585px;*/
-  /*width: 1329px;
-  height: 544px;*/
   width: 1257px;
   height: 733px;
   background-size: 100% 100%;
@@ -16,6 +13,23 @@ body {
   position: relative;
   overflow: hidden;
   display: inline-block;
+}
+#pipkas {
+  width: 100%;
+  height: 100%;
+  background-size: 100% 100%;
+  background-image: url("img/pipkas.png");
+  position: absolute;
+  overflow: hidden;
+  display: block;
+}
+
+.train {
+  width: 20px;
+  height: 20px;
+  background-color: blue;
+  border-radius: 10px;
+  position: absolute;
 }
 
 #timer {
