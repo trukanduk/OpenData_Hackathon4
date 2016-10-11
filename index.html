@@ -4,7 +4,8 @@
     <script src="js/RingBuffer.js" type="text/javascript"></script>
     <script src="js/Station.js" type="text/javascript"></script>
     <script src="js/Guy.js" type="text/javascript"></script>
-    <script src="js/Train.js" type="text/javascript"></script>
+    <script src="js/World.js" type="text/javascript"></script>
+    <!--<script src="js/Train.js" type="text/javascript"></script>-->
 
     <script src="data/wednesday.js" type="text/javascript"></script>
     <script src="data/timetable.js" type="text/javascript"></script>
@@ -44,46 +45,9 @@
         // { name: "Тучково",      coords: [55.597313, 36.468268] },
         // { name: "Можайск",      coords: [55.494289, 36.032167] },
       ];
-      var stations = [];
+      var world = null;
 
-      var _stationName2stationIndex = {};
-      function getStationByName(name) {
-        return stations[_stationName2stationIndex[name]];
-      }
-
-      var trains = [];
-
-      var worldTime = 0;
-      function setWorldTime(t) {
-        t = Math.floor(t) % 1440;
-
-        for (var i = 0; i < stations.length; ++i) {
-          var station = stations[i];
-          var item = data_inout[t][station.name]
-          if (!item) {
-            // console.warn("No station named " + station.name)
-            continue;
-          }
-
-          // console.log("Station " + station.name + ":", item.in, item.out);
-          station.inpIntensity = Math.ceil(item.in/10);
-          station.outpIntensity = Math.ceil(item.out/10);
-
-        }
-
-        for (var i = 0; i < trains.length; ++i) {
-          var train = trains[i];
-          train.setTime(t);
-        }
-
-        worldTime = t;
-        setTimerValue(worldTime);
-      }
-
-      function advanceWorldTime(dt) {
-        setWorldTime(worldTime + dt);
-
-      }
+      // var trains = [];
 
       function time2str(minutes) {
         var hours = Math.floor(minutes/60) + "";
@@ -98,9 +62,21 @@
         return hours + ":" + minutes
       }
 
-      function setTimerValue(t) {
+      function setWorldTime(t) {
+        t = Math.floor(t) % 1440;
+        world.setTime(t);
+
+        // for (var i = 0; i < trains.length; ++i) {
+        //   var train = trains[i];
+        //   train.setTime(t);
+        // }
+
         $("#timer").text(time2str(t));
         $("#slider").slider().data('slider').setValue(t);
+      }
+
+      function advanceWorldTime(dt) {
+        setWorldTime(world.time + dt);
       }
 
       var worldTimeIntervalId;
@@ -121,35 +97,33 @@
       // main
       $(document).ready(function() {
         var map = $("#map");
-        stations = [];
+        world = new World(map);
 
         for (var i = 0; i < stations_info.length; ++i) {
           var info = stations_info[i];
           var station = new Station(map, info.name, info.coords, info.offset);
-          _stationName2stationIndex[station.name] = stations.length;
-          stations.push(station);
+          world.addStation(station);
         }
 
-        if (ENABLE_TRAINS) {
-          for (var i in timetable) {
-            var info = timetable[i];
-            var train = new Train(map, info);
-            // var station = new Station(map, info.name, info.coords)
-            // _stationName2stationIndex[station.name] = stations.length;
-            // stations.push(station);
-            trains.push(train);
-            break;
-          }
-        }
+        // if (ENABLE_TRAINS) {
+        //   for (var i in timetable) {
+        //     var info = timetable[i];
+        //     var train = new Train(map, info);
+        //     // var station = new Station(map, info.name, info.coords)
+        //     // _stationName2stationIndex[station.name] = stations.length;
+        //     // stations.push(station);
+        //     trains.push(train);
+        //     break;
+        //   }
+        // }
 
-        setWorldTime(313); // 3:00
+        setWorldTime(313);
         // setWorldTime(5*60); // 3:00
         setWorldTimer(1);
+        world.runRenderTimer();
 
-        $("#slider").slider({
-              formatter: time2str});
-
-          $("#slider-enabled").click(function() {
+        $("#slider").slider({formatter: time2str});
+        $("#slider-enabled").click(function() {
           if(!$("#slider-enabled").hasClass("active")) {
             // $("#slider").slider("enable");
             setWorldTimer(0);
@@ -162,23 +136,15 @@
           }
         });
 
-        var updateSliderTime = function() {
-          setWorldTime(sliderTime.getValue());
-        };
-
         var sliderTime = $('#slider').slider()
-            .on('slide', updateSliderTime)
+            .on('slide', function() { setWorldTime(sliderTime.getValue()); })
             .data('slider');
       });
-
-
     </script>
   </head>
   <body>
     <h1>Остаться в живых</h1>
-    <div id="map">
-      <div id="pipkas"></div>
-    </div>
+    <canvas id="map" width="1257" height="733"></canvas>
     <div id="timer"></div>
     <div id="slider-block">
       <input id="slider" type="text" data-slider-min="0" data-slider-max="1439" data-slider-step="10"  data-slider-value="5" />
