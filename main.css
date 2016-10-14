@@ -6,22 +6,13 @@ body {
 }
 
 #map {
-  width: 1257px;
+  /*width: 1257px;
   height: 733px;
   background-size: 100% 100%;
-  background-image: url("img/background.png");
+  background-image: url("img/background.png");*/
   position: relative;
   overflow: hidden;
   display: inline-block;
-}
-#pipkas {
-  width: 100%;
-  height: 100%;
-  background-size: 100% 100%;
-  background-image: url("img/pipkas.png");
-  position: absolute;
-  overflow: hidden;
-  display: block;
 }
 
 .train {

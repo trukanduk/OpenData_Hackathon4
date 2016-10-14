@@ -2,6 +2,17 @@ var inBasketOffset = [17, 7];
 var outBasketOffset = [38, 30];
 var jiff = 100;
 
+var BasketSize = {"x": 70, "y": 53};
+
+var _stationsImage = null;
+function _getOrCreateStationImage() {
+  if (!_stationsImage) {
+    _stationsImage = new Image();
+    _stationsImage.src = "./img/basket.png";
+  }
+  return _stationsImage;
+}
+
 var StationsCounter = 0;
 function Station(map, name, coords, offset) {
   var self = this;
@@ -9,24 +20,20 @@ function Station(map, name, coords, offset) {
   self.name = name;
   self.id = StationsCounter++;
   self.coords = coords;
-  self.offset = offset || [10, -25];
-  // self.dataflow = [];
-
-  map.prepend("<div id='pipka_" + self.id + "' class='pipka'></div>");
-  self.element = map.find("#pipka_" + self.id);
-  // console.log(self.element, self.element.append);
 
   var perc = attlong2perc(self.coords);
-  self.percX = perc[0];
-  self.percY = perc[1];
+  offset = offset || [10, -25];
 
-  self.element.css("top", "calc(" + self.percY + "% + (" + self.offset[1] + "px))");
-  self.element.css("left", "calc(" + self.percX + "% + (" + self.offset[0] + "px))");
+  self.position = {
+    "x": Math.floor(map.width()*perc[0]/100 + offset[0]),
+    "y": Math.floor(map.height()*perc[1]/100 + offset[1]),
+  }
 
   self.inpIntensity = 0;
   self.outIntensity = 0;
 
   self.guys = {};
+  self.image = _getOrCreateStationImage();
 
   var inpCounter = 0;
   var outpCounter = 0;
@@ -42,8 +49,8 @@ function Station(map, name, coords, offset) {
       // console.log("Spawing " + spawningInpGuysNum + " guys..");
       for (var i = 0; i < spawningInpGuysNum; ++i) {
         var guy = new Guy("green", self);
+        guy.visible = false;
         self.guys[guy.id] = guy;
-        guy.element.hide();
 
         // guy.move(0, 0);
         self.moveInpGuyToBasket(guy);
@@ -60,8 +67,8 @@ function Station(map, name, coords, offset) {
       // console.log("Spawing " + spawningOutpGuysNum + " guys..");
       for (var i = 0; i < spawningOutpGuysNum; ++i) {
         var guy = new Guy("red", self);
+        guy.visible = false
         self.guys[guy.id] = guy;
-        guy.element.hide();
 
         // guy.move(0, 0);
         self.fadeInOutpGuy(guy);
@@ -92,8 +99,8 @@ Station.prototype.moveInpGuyToBasket = function(guy) {
     var x = Math.cos(angle)*radius - radius;
     var y = -Math.sin(angle)*Math.abs(radius);
     guy.move(x + inBasketOffset[0], y + inBasketOffset[1]);
-    guy.element.show();
-    guy.setOpacity(Math.min(1, ratio + 0.3));
+    guy.visible = true;
+    guy.opacity = Math.min(1, ratio + 0.3);
 
     if (ticks >= totalTicks){
       clearInterval(intId);
@@ -107,18 +114,19 @@ Station.prototype.fadeOutInpGuy = function(guy) {
 
   var ticks = 0;
   var totalTicks = second/jiff;
-  var yMoveDist = Math.random()*10 + 25;
+  var yMoveDist = Math.random()*10 + 20;
   var xMoveDist = 0.3*yMoveDist*(Math.random() - 0.5);
 
   var intId = setInterval(function() {
     ticks++;
     var ratio = ticks / totalTicks;
-    guy.setOpacity(1 - ratio);
+    guy.opacity = 1 - ratio;
     guy.move(inBasketOffset[0] + ratio*xMoveDist, inBasketOffset[1] + ratio*yMoveDist);
 
     if (ticks >= totalTicks) {
       clearInterval(intId);
-      guy.setOpacity(0);
+      guy.opacity = 0;
+      guy.visible = false;
       guy.kill();
     }
   }, jiff);
@@ -146,8 +154,8 @@ Station.prototype.moveOutpGuyFromBasket = function(guy) {
     var x = Math.cos(angle)*radius - radius;
     var y = Math.sin(angle)*Math.abs(radius);
     guy.move(x + outBasketOffset[0], y + outBasketOffset[1]);
-    guy.element.show();
-    guy.setOpacity(Math.min(1, 1.3 - ratio));
+    guy.visible = true;
+    guy.opacity = Math.min(1, 1.3 - ratio);
 
     if (ticks >= totalTicks){
       clearInterval(intId);
@@ -161,21 +169,21 @@ Station.prototype.fadeInOutpGuy = function(guy) {
 
   var ticks = 0;
   var totalTicks = second/jiff;
-  var yMoveDist = Math.random()*10 + 30;
+  var yMoveDist = Math.random()*10 + 20;
   var xMoveDist = yMoveDist*0.3*(Math.random()-0.5);
 
   var zero = [guy.dx, guy.dy];
   var intId = setInterval(function() {
-    guy.element.show();
+    guy.visible = true;
     ticks++;
     var ratio = ticks / totalTicks;
-    guy.setOpacity(ratio);
+    guy.opacity = ratio;
     guy.move(outBasketOffset[0] - (1 - ratio)*xMoveDist,
              outBasketOffset[1] - (1 - ratio)*yMoveDist);
 
     if (ticks >= totalTicks) {
       clearInterval(intId);
-      guy.setOpacity(1);
+      guy.opacity = 1;
 
       // console.error("wow!");
       station.moveOutpGuyFromBasket(guy);
@@ -191,6 +199,15 @@ Station.prototype._removeGuy = function(guyOrGuyId) {
 
   var guy = this.guys[id];
   delete this.guys[id];
+}
 
-  guy.element.remove();
+Station.prototype.repaint = function(ctx) {
+  ctx.translate(this.position.x, this.position.y);
+
+  ctx.drawImage(this.image, 0, 0);
+  for (var guyId in this.guys) {
+    this.guys[guyId].repaint(ctx);
+  }
+
+  ctx.translate(-this.position.x, -this.position.y);
 }
