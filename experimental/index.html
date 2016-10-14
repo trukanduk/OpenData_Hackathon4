@@ -1,0 +1,157 @@
+<html>
+  <head>
+    <title>Остаться в живых</title>
+    <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js"   integrity="sha256-/SIrNqv8h6QGKDuNoLGA4iret+kyesCkHGzVUUV0shc="   crossorigin="anonymous"></script>
+    <script src="js/RingBuffer.js" type="text/javascript"></script>
+    <script src="js/Station.js" type="text/javascript"></script>
+    <script src="js/Guy.js" type="text/javascript"></script>
+    <script src="js/World.js" type="text/javascript"></script>
+    <!--<script src="js/Train.js" type="text/javascript"></script>-->
+
+    <script src="data/wednesday.js" type="text/javascript"></script>
+    <script src="data/timetable.js" type="text/javascript"></script>
+
+    <!--<script src="schools-data2.js" type="text/javascript"></script>-->
+    <!-- <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script> -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="main.css" />
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" type="text/javascript"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.2.0/bootstrap-slider.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.2.0/css/bootstrap-slider.min.css" />
+    <script type="text/javascript">
+      var ENABLE_TRAINS = false;
+      var second = 1000;
+
+      var map_start = [55.836, 36.90788];
+      var map_end = [55.5799, 37.77443];
+      var map_size = [map_end[0] - map_start[0], map_end[1] - map_start[1]];
+
+      function attlong2perc(coords) {
+        // Attention: returns percents!
+        return [100*(coords[1] - map_start[1]) / map_size[1],
+                100*(coords[0] - map_start[0]) / map_size[0]];
+      }
+
+      var stations_info = [
+        { name: "Белорусская",  coords: [55.776507, 37.581550], offset: [35, -10] },
+        { name: "Беговая",      coords: [55.773179, 37.549965], offset: [-20, -120] },
+        { name: "Фили",         coords: [55.744021, 37.514391], offset: [25, 10] },
+        { name: "Кунцево-1",    coords: [55.726837, 37.448950], offset: [0, 0] },
+        { name: "Сетунь",       coords: [55.723244, 37.396334], offset: [15, 0] },
+        { name: "Баковка",      coords: [55.682569, 37.314669], offset: [0, -05] },
+        { name: "Одинцово",     coords: [55.672362, 37.282680], offset: [-10, 15] },
+        { name: "Отрадное",     coords: [55.667802, 37.250379], offset: [-30, -5] },
+        { name: "Жаворонки",    coords: [55.641834, 37.096346], offset: [0, -15] },
+        { name: "Голицыно",     coords: [55.614944, 36.986498], offset: [10, -25] },
+        // { name: "Тучково",      coords: [55.597313, 36.468268] },
+        // { name: "Можайск",      coords: [55.494289, 36.032167] },
+      ];
+      var world = null;
+
+      // var trains = [];
+
+      function time2str(minutes) {
+        var hours = Math.floor(minutes/60) + "";
+        while (hours.length < 2) {
+          hours = "0" + hours;
+        }
+        var minutes = Math.floor(minutes%60) + "";
+        while (minutes.length < 2) {
+          minutes = "0" + minutes;
+        }
+
+        return hours + ":" + minutes
+      }
+
+      function setWorldTime(t) {
+        t = Math.floor(t) % 1440;
+        world.setTime(t);
+
+        // for (var i = 0; i < trains.length; ++i) {
+        //   var train = trains[i];
+        //   train.setTime(t);
+        // }
+
+        $("#timer").text(time2str(t));
+        $("#slider").slider().data('slider').setValue(t);
+      }
+
+      function advanceWorldTime(dt) {
+        setWorldTime(world.time + dt);
+      }
+
+      var worldTimeIntervalId;
+      function setWorldTimer(minutesByJiff) {
+        if (worldTimeIntervalId) {
+          clearInterval(worldTimeIntervalId);
+          worldTimeIntervalId = undefined;
+        }
+
+        if (minutesByJiff > 0) {
+          worldTimeIntervalId = setInterval(function() {
+            advanceWorldTime(minutesByJiff);
+          }, 100);
+        }
+      }
+
+      //*******************************************************************************************
+      // main
+      $(document).ready(function() {
+        var map = $("#map");
+        world = new World(map);
+
+        for (var i = 0; i < stations_info.length; ++i) {
+          var info = stations_info[i];
+          var station = new Station(map, info.name, info.coords, info.offset);
+          world.addStation(station);
+        }
+
+        // if (ENABLE_TRAINS) {
+        //   for (var i in timetable) {
+        //     var info = timetable[i];
+        //     var train = new Train(map, info);
+        //     // var station = new Station(map, info.name, info.coords)
+        //     // _stationName2stationIndex[station.name] = stations.length;
+        //     // stations.push(station);
+        //     trains.push(train);
+        //     break;
+        //   }
+        // }
+
+        setWorldTime(313);
+        // setWorldTime(5*60); // 3:00
+        setWorldTimer(1);
+        world.runRenderTimer();
+
+        $("#slider").slider({formatter: time2str});
+        $("#slider-enabled").click(function() {
+          if(!$("#slider-enabled").hasClass("active")) {
+            // $("#slider").slider("enable");
+            setWorldTimer(0);
+            console.log("resume");
+          }
+          else {
+            // $("#slider").slider("disable");
+            setWorldTimer(1);
+            console.log("pause");
+          }
+        });
+
+        var sliderTime = $('#slider').slider()
+            .on('slide', function() { setWorldTime(sliderTime.getValue()); })
+            .data('slider');
+      });
+    </script>
+  </head>
+  <body>
+    <h1>Остаться в живых</h1>
+    <canvas id="map" width="1257" height="733"></canvas>
+    <div id="timer"></div>
+    <div id="slider-block">
+      <input id="slider" type="text" data-slider-min="0" data-slider-max="1439" data-slider-step="10"  data-slider-value="5" />
+      <button id="slider-enabled" type="button" class="btn btn-info glyphicon glyphicon-pause" data-toggle="button" aria-pressed="false" autocomplete="off">
+      </button>
+
+    </div>
+  </body>
+</html>
